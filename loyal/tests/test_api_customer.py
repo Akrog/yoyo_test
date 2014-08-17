@@ -8,6 +8,13 @@ from loyal.models import Customer, Product, Sale, Stamp, Voucher
 
 
 class APICustomer(APITestCase):
+    """
+    This class tests following endpoints
+        /loyal/customer
+        /loyal/customer/stamps
+        /loyal/customer/vouchers
+    """
+
     CUST_LIST_ENDP  = 0
     CUST_DET_ENDP   = 1
     STAMP_LIST_ENDP = 2
@@ -46,6 +53,7 @@ class APICustomer(APITestCase):
         """
         Test that endpoint's GET for customers list is working.
         On an empty DB it should always return empty list.
+        This tests the GET endpoint /loyal/customer
         """
 
         # Get list
@@ -62,6 +70,7 @@ class APICustomer(APITestCase):
         """
         Verify that the customers list endpoint returns customers from the DB.
         This is a basic test with only 1 customer.
+        This tests the GET endpoint /loyal/customer
         """
 
         # Create customer
@@ -82,11 +91,11 @@ class APICustomer(APITestCase):
         self.assertEqual(expected_customer, response.data[0])
 
 
-
     def test_list_create_one_customer(self):
         """
         Verify that the customers list endpoint for customer creation works.
         Simple test that will POST only 1 new customer
+        This tests the POST endpoint /loyal/customer
         """
 
         # POST creation
@@ -101,10 +110,30 @@ class APICustomer(APITestCase):
         self.assertEqual(response.data, expected_customer)
 
 
+    def test_get_detail_unkown_customer(self):
+        """
+        Verify that the customers detail endpoint returns customer info.
+        This is a basic test with only 1 customer.
+        This tests the GET endpoint /loyal/customer/${id}
+        """
+
+        # Create customer
+        c = Customer(**self.new_customer)
+        c.save()
+
+        # Get details
+        url = self.get_url(self.CUST_DET_ENDP, args=[c.pk+1])
+        response = self.client.get(url)
+
+        # Confirm it's an ERROR
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+
     def test_get_detail_one_customer(self):
         """
         Verify that the customers detail endpoint returns customer info.
         This is a basic test with only 1 customer.
+        This tests the GET endpoint /loyal/customer/${id}
         """
 
         # Create customer
@@ -125,12 +154,12 @@ class APICustomer(APITestCase):
         self.assertEqual(expected_customer, response.data)
 
 
-
     def test_get_detail_one_customer_with_counters(self):
         """
         Verify that the customers detail endpoint returns customer info.
         This is a basic test with only 1 customer but wih data on the
         counters.
+        This tests the GET endpoint /loyal/customer/${id}
         """
 
         num_sales = 3
@@ -167,6 +196,11 @@ class APICustomer(APITestCase):
 
 
     def test_stamp_list_empty(self):
+        """
+        Test that for a given customer initially the stamp list is empty.
+        This tests the GET from endpoint /loyal/customer/${id}/stamps.
+        """
+
         # Create customer
         c = Customer(**self.new_customer)
         c.save()
@@ -180,7 +214,50 @@ class APICustomer(APITestCase):
         self.assertEqual(response.data, [])
 
 
+    def test_stamp_list_populated(self):
+        """
+        Test that for a given customer we can see it's stamps.
+        We create 2 stamps directly in the DB, one free and one from purchasing a product.
+        This tests the GET from endpoint /loyal/customer/${id}/stamps.
+        """
+
+        # Create customer
+        c = Customer(**self.new_customer)
+        c.save()
+
+        # Create product
+        p = Product(**self.new_product)
+        p.save()
+
+        # Create stamp
+        s = Stamp(owned_by=c, obtained_with=p, grouped_in=None)
+        s.save()
+
+        # Create free stamp
+        s = Stamp(owned_by=c)
+        s.save()
+
+        # Get list
+        url = self.get_url(self.STAMP_LIST_ENDP, args=[c.pk])
+        response = self.client.get(url)
+
+        # Confirm it's OK
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(2, len(response.data))
+
+        stamp_data = {'obtained_with': p.pk, 'grouped_in': None}
+        self.assertEqual(response.data[0], stamp_data)
+
+        stamp_data['obtained_with'] = None
+        self.assertEqual(response.data[1], stamp_data)
+
+
     def test_create_free_stamp(self):
+        """
+        Test that creates a free stamp for a given customer.
+        This tests the POST from endpoint /loyal/customer/${id}/stamps.
+        """
+
         # Create customer in DB
         c = Customer(**self.new_customer)
         c.save()
@@ -196,6 +273,11 @@ class APICustomer(APITestCase):
 
 
     def test_create_stamp(self):
+        """
+        Test that creates a normal stamp for a given customer.
+        This tests the POST from endpoint /loyal/customer/${id}/stamps.
+        """
+
         # Create customer in DB
         c = Customer(**self.new_customer)
         c.save()
@@ -215,6 +297,11 @@ class APICustomer(APITestCase):
 
 
     def test_voucher_list_empty(self):
+        """
+        Test that for a given customer initially the voucher list is empty.
+        This tests the GET endpoint /loyal/customer/${id}/vouchers
+        """
+
         # Create customer
         c = Customer(**self.new_customer)
         c.save()
@@ -229,6 +316,11 @@ class APICustomer(APITestCase):
 
 
     def test_create_free_voucher(self):
+        """
+        Test that creates a free voucher for a given customer.
+        This tests the POST from endpoint /loyal/customer/${id}/vouchers
+        """
+
         # Create customer in DB
         c = Customer(**self.new_customer)
         c.save()
@@ -245,6 +337,11 @@ class APICustomer(APITestCase):
 
 
     def test_create_voucher(self):
+        """
+        Test that creates a redeemed voucher for a given customer.
+        This tests the POST from endpoint /loyal/customer/${id}/vouchers
+        """
+
         # Create customer in DB
         c = Customer(**self.new_customer)
         c.save()
