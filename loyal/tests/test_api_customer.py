@@ -34,7 +34,6 @@ class APICustomer(APITestCase):
         This is a basic test with only 1 customer.
         """
 
-
         # Create customer
         c = Customer(**self.new_customer)
         c.save()
@@ -61,3 +60,23 @@ class APICustomer(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data, self.new_customer)
+
+
+
+    def test_get_detail_one_customer(self):
+        """
+        Verify that the customers detail endpoint returns customer info.
+        This is a basic test with only 1 customer.
+        """
+
+        # Create customer
+        c = Customer(**self.new_customer)
+        c.save()
+
+        # Get details
+        url = reverse('loyal:customer-detail', args=[c.pk])
+        response = self.client.get(url)
+
+        # Confirm it's OK
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(self.new_customer, response.data)
