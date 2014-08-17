@@ -43,7 +43,7 @@ class APICustomer(APITestCase):
         response = self.client.get(url)
 
         # Create expected customer, now includes the id
-        expected_customer = self.new_customer
+        expected_customer = dict(self.new_customer)
         expected_customer['id'] = c.pk
 
         # Confirm it's OK
@@ -64,7 +64,7 @@ class APICustomer(APITestCase):
         response = self.client.post(url, self.new_customer)
 
         # Create expected customer, now includes the id
-        expected_customer = self.new_customer
+        expected_customer = dict(self.new_customer)
         expected_customer['id'] = 1
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -86,6 +86,11 @@ class APICustomer(APITestCase):
         url = reverse('loyal:customer-detail', args=[c.pk])
         response = self.client.get(url)
 
+        expected_customer = dict(self.new_customer)
+        expected_customer['num_stamps'] = 0
+        expected_customer['num_vouchers'] = 0
+        expected_customer['num_purchases'] = 0
+
         # Confirm it's OK
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(self.new_customer, response.data)
+        self.assertEqual(expected_customer, response.data)
