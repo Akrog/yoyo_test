@@ -82,11 +82,13 @@ class Stamp(models.Model):
     Stamp model:
         owned_by      -> The customer who owns this stamp
         obtained_with -> Which product produced this stamp
+        grouped_in    -> In which voucher has been grouped this stamp
 
+    We allow the creation of stamps with no product attached to, in case it's a gift or similar case.
     """
 
     owned_by = models.ForeignKey(Customer)
-    obtained_with = models.OneToOneField(Product)
+    obtained_with = models.OneToOneField(Product, blank=True, null=True, verbose_name='product which purchase generated this stamp')
     grouped_in = models.ForeignKey(Voucher, blank=True, null=True, verbose_name='grouped in voucher')
 
     def __unicode__(self):
