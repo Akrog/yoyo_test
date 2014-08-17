@@ -8,6 +8,10 @@ from loyal.models import Customer
 
 class APICustomer(APITestCase):
 
+    new_customer = {'first_name':"John",
+                    'last_name':"Doe",
+                    'email': "john.doe@gmail.com"}
+
     def test_get_list_empty(self):
         """
         Test that endpoint's GET for customers list is working.
@@ -30,12 +34,9 @@ class APICustomer(APITestCase):
         This is a basic test with only 1 customer.
         """
 
-        new_customer = {'first_name':"John",
-                        'last_name':"Doe",
-                        'email': "john.doe@gmail.com"}
 
         # Create customer
-        c = Customer(**new_customer)
+        c = Customer(**self.new_customer)
         c.save()
 
         # Get list
@@ -45,7 +46,7 @@ class APICustomer(APITestCase):
         # Confirm it's OK
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(1, len(response.data))
-        self.assertEqual(new_customer, response.data[0])
+        self.assertEqual(self.new_customer, response.data[0])
 
 
 
@@ -55,12 +56,8 @@ class APICustomer(APITestCase):
         Simple test that will POST only 1 new customer
         """
 
-        new_customer = {'first_name':"John",
-                        'last_name':"Doe",
-                        'email': "john.doe@gmail.com"}
-
         url = reverse('loyal:customer-list')
-        response = self.client.post(url, new_customer)
+        response = self.client.post(url, self.new_customer)
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(response.data, new_customer)
+        self.assertEqual(response.data, self.new_customer)
