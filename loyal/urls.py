@@ -1,4 +1,7 @@
 from django.conf.urls import patterns, url
 
-urlpatterns = patterns('loyal.views',
+from loyal.views import CustomerList
+
+urlpatterns = patterns('',
+                       url(r'^$', CustomerList.as_view())
 )
