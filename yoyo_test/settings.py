@@ -25,8 +25,8 @@ DEBUG = True
 
 TEMPLATE_DEBUG = True
 
-ALLOWED_HOSTS = []
-
+# Allow all host headers
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -59,12 +59,21 @@ WSGI_APPLICATION = 'yoyo_test.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.6/ref/settings/#databases
 
-DATABASES = {
-    'default': {
+# Parse database configuration from $DATABASE_URL
+import dj_database_url
+try:
+    DATABASES
+except NameError:
+    DATABASES = dict()
+
+DATABASES['default'] =  dj_database_url.config()
+
+if not DATABASES['default']:
+    DATABASES['default'] = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
-}
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.6/topics/i18n/
@@ -93,3 +102,14 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.JSONRenderer',
     )
 }
+
+
+# Honor the 'X-Forwarded-Proto' header for request.is_secure()
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# Static asset configuration
+STATIC_ROOT = 'staticfiles'
+
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR, 'static'),
+)
