@@ -42,24 +42,33 @@ class APICustomer(APITestCase):
         url = reverse('loyal:customer-list')
         response = self.client.get(url)
 
+        # Create expected customer, now includes the id
+        expected_customer = self.new_customer
+        expected_customer['id'] = c.pk
+
         # Confirm it's OK
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(1, len(response.data))
-        self.assertEqual(self.new_customer, response.data[0])
+        self.assertEqual(expected_customer, response.data[0])
 
 
 
-    def test_create_one_customer(self):
+    def test_list_create_one_customer(self):
         """
         Verify that the customers list endpoint for customer creation works.
         Simple test that will POST only 1 new customer
         """
 
+        # POST creation
         url = reverse('loyal:customer-list')
         response = self.client.post(url, self.new_customer)
 
+        # Create expected customer, now includes the id
+        expected_customer = self.new_customer
+        expected_customer['id'] = 1
+
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(response.data, self.new_customer)
+        self.assertEqual(response.data, expected_customer)
 
 
 

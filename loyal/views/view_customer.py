@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from loyal.models import Customer
-from loyal.serializers import CustomerSerializer
+from loyal.serializers import CustomerSerializer, CustomerSerializerDetail
 from rest_framework import generics
 
 # Create your views here.
@@ -21,4 +21,4 @@ class CustomerDetail(generics.RetrieveAPIView):
     """
 
     queryset = Customer.objects.all()
-    serializer_class = CustomerSerializer
+    serializer_class = CustomerSerializerDetail
