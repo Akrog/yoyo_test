@@ -60,6 +60,7 @@ class Product(models.Model):
         return " ".join([self.PRODUCT_CHOICES[self.kind][1], "[", str(self.pk), "]"])
 
 
+
 class Voucher(models.Model):
     """
     Voucher model:
@@ -75,6 +76,7 @@ class Voucher(models.Model):
     def __unicode__(self):
         status = "Redeemed" if self.redeemed_with else "Available"
         return " ".join(["[",str(self.pk),"]", self.owned_by.email, "-", status])
+
 
 
 class Stamp(models.Model):
@@ -93,3 +95,33 @@ class Stamp(models.Model):
 
     def __unicode__(self):
         return " ".join(["[", str(self.pk), "]", self.owned_by.email])
+
+
+    def save(self, *args, **kwargs):
+        """
+        For every 10 stamps created we have to convert them into 1 voucher.
+        So for every stamp we create we check if we have 10 and create the voucher and assign it to the customer.
+        """
+
+        is_new_stamp = not self.pk
+
+        # Call the "real" save() method.
+        super(Stamp, self).save(*args, **kwargs)
+
+        # Convert to vouchers every 10 stamps
+        if is_new_stamp:
+            # Get all stamps that have not already been converted to vouchers
+            stamps = Stamp.objects.filter(grouped_in__isnull=True, owned_by=self.owned_by)
+
+            for i in xrange(9, stamps.count(), 10):
+                # Create new voucher
+                voucher = Voucher(redeemed_in=None)
+                voucher.save()
+
+                # Get the 10 vouchers
+                to_voucher = stamps[i-9:i+1]
+
+                # Now they have been grouped in the new voucher
+                for stamp in to_voucher:
+                    stamp.grouped_in = voucher
+                    stamp.save()
