@@ -14,3 +14,11 @@ class CustomerList(generics.ListCreateAPIView):
 
     queryset = Customer.objects.all()
     serializer_class = CustomerSerializer
+
+class CustomerDetail(generics.RetrieveAPIView):
+    """
+    This endpoint shows detailed information of one customer.
+    """
+
+    queryset = Customer.objects.all()
+    serializer_class = CustomerSerializer
