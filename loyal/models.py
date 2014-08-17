@@ -89,6 +89,8 @@ class Stamp(models.Model):
     We allow the creation of stamps with no product attached to, in case it's a gift or similar case.
     """
 
+    STAMPS_PER_VOUCHER = 10
+
     owned_by = models.ForeignKey(Customer)
     obtained_with = models.OneToOneField(Product, blank=True, null=True, verbose_name='product which purchase generated this stamp')
     grouped_in = models.ForeignKey(Voucher, blank=True, null=True, verbose_name='grouped in voucher')
@@ -113,13 +115,13 @@ class Stamp(models.Model):
             # Get all stamps that have not already been converted to vouchers
             stamps = Stamp.objects.filter(grouped_in__isnull=True, owned_by=self.owned_by)
 
-            for i in xrange(9, stamps.count(), 10):
+            for i in xrange(self.STAMPS_PER_VOUCHER-1, stamps.count(), self.STAMPS_PER_VOUCHER):
                 # Create new voucher
-                voucher = Voucher(redeemed_in=None)
+                voucher = Voucher(owned_by=self.owned_by, redeemed_with=None)
                 voucher.save()
 
                 # Get the 10 vouchers
-                to_voucher = stamps[i-9:i+1]
+                to_voucher = stamps[i+1-self.STAMPS_PER_VOUCHER:i+1]
 
                 # Now they have been grouped in the new voucher
                 for stamp in to_voucher:
