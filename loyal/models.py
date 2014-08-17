@@ -11,9 +11,9 @@ class Customer(models.Model):
         email
     """
 
-    first_name = models.CharField(max_length=20)
-    last_name = models.CharField(max_length=20)
-    email = models.EmailField()
+    first_name = models.CharField(max_length=20, help_text="First name")
+    last_name = models.CharField(max_length=20, help_text="Last name")
+    email = models.EmailField(help_text="E-mail address")
 
     def __unicode__(self):
         return " ".join([self.first_name, self.last_name, "<" + self.email + ">"])
@@ -27,8 +27,8 @@ class Sale(models.Model):
         date     -> When was this purchase made
     """
 
-    customer = models.ForeignKey(Customer)
-    date = models.DateTimeField(default=timezone.now, verbose_name='purchase date')
+    customer = models.ForeignKey(Customer, help_text="Sold to")
+    date = models.DateTimeField(default=timezone.now, verbose_name='Date of sale', help_text="Date of sale")
 
     def __unicode__(self):
         return " ".join([str(self.pk), "-", self.customer.email])
@@ -51,10 +51,10 @@ class Product(models.Model):
         (GIZMO, 'gizmo')
     )
 
-    kind = models.SmallIntegerField(choices=PRODUCT_CHOICES, verbose_name='kind of product')
-    date = models.DateTimeField(default=timezone.now, verbose_name='manufacture date')
-    serial_num = models.CharField(unique=True, max_length=20, verbose_name='serial number')
-    sale = models.ForeignKey(Sale, blank=True, null=True)
+    kind = models.SmallIntegerField(choices=PRODUCT_CHOICES, verbose_name='kind of product', help_text="kind of product [widget=0, gizmo=1]")
+    date = models.DateTimeField(default=timezone.now, verbose_name='manufacture date', help_text="manufactured date")
+    serial_num = models.CharField(unique=True, max_length=20, verbose_name='serial number', help_text="serial number")
+    sale = models.ForeignKey(Sale, blank=True, null=True, help_text="Sold on this sale order")
 
     def __unicode__(self):
         return " ".join([self.PRODUCT_CHOICES[self.kind][1], "[", str(self.pk), "]"])
@@ -69,9 +69,9 @@ class Voucher(models.Model):
         date          -> When it was created
     """
 
-    owned_by = models.ForeignKey(Customer)
-    date = models.DateTimeField(auto_now_add=True, verbose_name='creation date')
-    redeemed_with = models.OneToOneField(Product, blank=True, null=True, verbose_name='product acquired redeeming this voucher')
+    owned_by = models.ForeignKey(Customer, help_text="Customer who owns it")
+    date = models.DateTimeField(auto_now_add=True, verbose_name='creation date', help_text="Creation date")
+    redeemed_with = models.OneToOneField(Product, blank=True, null=True, verbose_name='product acquired redeeming this voucher', help_text="Product acquired redeeming this voucher")
 
     def __unicode__(self):
         status = "Redeemed" if self.redeemed_with else "Available"
@@ -91,9 +91,12 @@ class Stamp(models.Model):
 
     STAMPS_PER_VOUCHER = 10
 
-    owned_by = models.ForeignKey(Customer)
-    obtained_with = models.OneToOneField(Product, blank=True, null=True, verbose_name='product which purchase generated this stamp')
-    grouped_in = models.ForeignKey(Voucher, blank=True, null=True, verbose_name='grouped in voucher')
+    owned_by = models.ForeignKey(Customer, help_text="Customer who owns it")
+    obtained_with = models.OneToOneField(Product, blank=True, null=True,
+                                         verbose_name='product which purchase generated this stamp',
+                                         help_text="Product which purchase generated this stamp")
+    grouped_in = models.ForeignKey(Voucher, blank=True, null=True,
+                                   verbose_name='grouped in voucher', help_text="grouped in voucher")
 
     def __unicode__(self):
         return " ".join(["[", str(self.pk), "]", self.owned_by.email])
