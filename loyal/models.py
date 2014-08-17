@@ -68,7 +68,7 @@ class Voucher(models.Model):
         date          -> When it was created
     """
 
-    owned_by = models.OneToOneField(Customer)
+    owned_by = models.ForeignKey(Customer)
     date = models.DateTimeField(auto_now_add=True, verbose_name='creation date')
     redeemed_with = models.OneToOneField(Product, blank=True, null=True)
 
@@ -84,9 +84,10 @@ class Stamp(models.Model):
         obtained_with -> Which product produced this stamp
 
     """
-    owned_by = models.OneToOneField(Customer)
+
+    owned_by = models.ForeignKey(Customer)
     obtained_with = models.OneToOneField(Product)
     grouped_in = models.ForeignKey(Voucher, blank=True, null=True, verbose_name='grouped in voucher')
 
     def __unicode__(self):
-        return " ".join(["[", self.pk, "]", self.owned_by.email])
+        return " ".join(["[", str(self.pk), "]", self.owned_by.email])
