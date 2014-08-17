@@ -82,3 +82,12 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.6/howto/static-files/
 
 STATIC_URL = '/static/'
+
+
+# REST FRAMEWORK
+REST_FRAMEWORK = {
+    'TEST_REQUEST_DEFAULT_FORMAT':'json',
+    'TEST_REQUEST_RENDERER_CLASSES':(
+        'rest_framework.renderers.JSONRenderer',
+    )
+}

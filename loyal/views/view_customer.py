@@ -10,9 +10,6 @@ class CustomerList(generics.ListCreateAPIView):
     customers.
 
     Fields are self-explanatory.
-
-
-
     """
 
     queryset = Customer.objects.all()
