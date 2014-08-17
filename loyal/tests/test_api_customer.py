@@ -9,6 +9,15 @@ from loyal.models import Customer, Product, Sale, Stamp, Voucher
 
 class APICustomer(APITestCase):
 
+    namespace_path = ['loyal', 'customer']
+
+    entrypoints = {
+        'client-list'  :'customer-list',
+        'client-detail':'customer-detail',
+        'stamp-list'   :'stamp-list'
+    }
+
+
     new_customer = {'first_name':"John",
                     'last_name':"Doe",
                     'email': "john.doe@gmail.com"}
@@ -20,6 +29,12 @@ class APICustomer(APITestCase):
         'sale': None
     }
 
+
+    def get_url(self, name, *args, **kwargs):
+        namespace = ":".join(self.namespace_path)
+        return reverse(namespace + ":" + self.entrypoints[name], *args, **kwargs)
+
+
     def test_get_list_empty(self):
         """
         Test that endpoint's GET for customers list is working.
@@ -27,7 +42,7 @@ class APICustomer(APITestCase):
         """
 
         # Get list
-        url = reverse('loyal:customer-list')
+        url = self.get_url('client-list')
         response = self.client.get(url)
 
         # Confirm it's OK
@@ -47,7 +62,7 @@ class APICustomer(APITestCase):
         c.save()
 
         # Get list
-        url = reverse('loyal:customer-list')
+        url = self.get_url('client-list')
         response = self.client.get(url)
 
         # Create expected customer, now includes the id
@@ -68,7 +83,7 @@ class APICustomer(APITestCase):
         """
 
         # POST creation
-        url = reverse('loyal:customer-list')
+        url = self.get_url('client-list')
         response = self.client.post(url, self.new_customer)
 
         # Create expected customer, now includes the id
@@ -91,7 +106,7 @@ class APICustomer(APITestCase):
         c.save()
 
         # Get details
-        url = reverse('loyal:customer-detail', args=[c.pk])
+        url = self.get_url('client-detail', args=[c.pk])
         response = self.client.get(url)
 
         expected_customer = dict(self.new_customer)
@@ -133,7 +148,7 @@ class APICustomer(APITestCase):
             v.save()
 
         # Get details
-        url = reverse('loyal:customer-detail', args=[c.pk])
+        url = self.get_url('client-detail', args=[c.pk])
         response = self.client.get(url)
 
         expected_customer = dict(self.new_customer)
