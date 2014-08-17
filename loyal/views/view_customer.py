@@ -6,10 +6,7 @@ from rest_framework import generics
 # Create your views here.
 class CustomerList(generics.ListCreateAPIView):
     """
-    This endpoint lists the customers in the system and allow creation of new
-    customers.
-
-    Fields are self-explanatory.
+    This endpoint lists the customers in the system and allows creation of new customers.
     """
 
     queryset = Customer.objects.all()
