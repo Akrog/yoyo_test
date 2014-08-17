@@ -64,17 +64,17 @@ class Voucher(models.Model):
     """
     Voucher model:
         owned_by      -> The customer who owns this voucher
-        redeemed_with -> Which product it redeemed
+        redeemed_with -> Product acquired by redeeming this voucher
         date          -> When it was created
     """
 
     owned_by = models.ForeignKey(Customer)
     date = models.DateTimeField(auto_now_add=True, verbose_name='creation date')
-    redeemed_with = models.OneToOneField(Product, blank=True, null=True)
+    redeemed_with = models.OneToOneField(Product, blank=True, null=True, verbose_name='product acquired redeeming this voucher')
 
     def __unicode__(self):
-        status = "Redeemed" if redeemed_with else "Available"
-        return " ".join(["[",str(self.pk),"]", owned_by.email, "-", status])
+        status = "Redeemed" if self.redeemed_with else "Available"
+        return " ".join(["[",str(self.pk),"]", self.owned_by.email, "-", status])
 
 
 class Stamp(models.Model):
