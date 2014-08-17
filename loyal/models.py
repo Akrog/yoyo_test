@@ -58,3 +58,35 @@ class Product(models.Model):
 
     def __unicode__(self):
         return " ".join([self.PRODUCT_CHOICES[self.kind][1], "[", str(self.pk), "]"])
+
+
+class Voucher(models.Model):
+    """
+    Voucher model:
+        owned_by      -> The customer who owns this voucher
+        redeemed_with -> Which product it redeemed
+        date          -> When it was created
+    """
+
+    owned_by = models.OneToOneField(Customer)
+    date = models.DateTimeField(auto_now_add=True, verbose_name='creation date')
+    redeemed_with = models.OneToOneField(Product, blank=True, null=True)
+
+    def __unicode__(self):
+        status = "Redeemed" if redeemed_with else "Available"
+        return " ".join(["[",str(self.pk),"]", owned_by.email, "-", status])
+
+
+class Stamp(models.Model):
+    """
+    Stamp model:
+        owned_by      -> The customer who owns this stamp
+        obtained_with -> Which product produced this stamp
+
+    """
+    owned_by = models.OneToOneField(Customer)
+    obtained_with = models.OneToOneField(Product)
+    grouped_in = models.ForeignKey(Voucher, blank=True, null=True, verbose_name='grouped in voucher')
+
+    def __unicode__(self):
+        return " ".join(["[", self.pk, "]", self.owned_by.email])
