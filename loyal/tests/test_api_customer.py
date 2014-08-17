@@ -359,3 +359,31 @@ class APICustomer(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         voucher_data ["date"] = response.data.get("date", None)
         self.assertEqual(response.data, voucher_data)
+
+
+    def test_voucher_autogeneration(self):
+        """
+        Test that for every 10 stamps that we create for a customer a voucher is generated.
+        This tests the POST from endpoint /loyal/customer/${id}/stamps.
+        """
+
+        # Create customer
+        c = Customer(**self.new_customer)
+        c.save()
+
+        # Create 10 stamps
+        url = self.get_url(self.STAMP_LIST_ENDP, args=[c.pk])
+        for _ in xrange(10):
+            response = self.client.post(url)
+            self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        # Retrieve stamps from DB
+        stamps = Stamp.objects.all()
+        self.assertEqual(10, len(stamps))
+
+        # Retrieve vouchers from DB
+        vouchers = Voucher.objects.all()
+        self.assertEqual(1, len(vouchers))
+
+        # Confirm that there are 10 stamps linked to the voucher
+        self.assertEqual(10, vouchers[0].stamp_set.count())
