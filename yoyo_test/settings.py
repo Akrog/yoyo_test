@@ -38,6 +38,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'loyal',
     'rest_framework',
+    'rest_framework_swagger',
 )
 
 MIDDLEWARE_CLASSES = (
