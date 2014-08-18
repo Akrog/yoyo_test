@@ -3,12 +3,12 @@ from loyal.models import Product, Customer
 
 class ProductSerializer(serializers.ModelSerializer):
     kind_name = serializers.SerializerMethodField('get_kind_name')
-    link = serializers.HyperlinkedIdentityField(view_name='loyal:product:product-detail')
+    to_modify = serializers.HyperlinkedIdentityField(view_name='loyal:product:product-detail')
 
     class Meta:
         model = Product
 
-        fields = ('id', 'link', 'kind', 'kind_name', 'date', 'serial_num', 'sale')
+        fields = ('id', 'to_modify', 'kind', 'kind_name', 'date', 'serial_num', 'sale')
 
     def get_kind_name(self, obj):
         return Product. PRODUCT_CHOICES[obj.kind][1]

@@ -22,11 +22,11 @@ class VoucherSerializer(serializers.ModelSerializer):
 
 
 class VoucherListSerializer(serializers.ModelSerializer):
-    link = serializers.HyperlinkedIdentityField(view_name='loyal:voucher:voucher-detail')
+    to_modify = serializers.HyperlinkedIdentityField(view_name='loyal:voucher:voucher-detail')
 
     class Meta:
         model = Voucher
-        fields = ('id', 'link', 'owned_by', 'redeemed_with', 'date')
+        fields = ('id', 'to_modify', 'owned_by', 'redeemed_with', 'date')
 
 
 class VoucherDetailSerializer(serializers.ModelSerializer):

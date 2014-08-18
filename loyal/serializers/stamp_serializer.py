@@ -23,11 +23,11 @@ class StampSerializer(serializers.ModelSerializer):
 
 
 class StampListSerializer(serializers.ModelSerializer):
-    link = serializers.HyperlinkedIdentityField(view_name='loyal:stamp:stamp-detail')
+    to_modify = serializers.HyperlinkedIdentityField(view_name='loyal:stamp:stamp-detail')
 
     class Meta:
         model = Stamp
-        fields = ('id', 'link', 'owned_by', 'obtained_with', 'grouped_in')
+        fields = ('id', 'to_modify', 'owned_by', 'obtained_with', 'grouped_in')
 
 
 class StampDetailSerializer(serializers.ModelSerializer):
