@@ -103,7 +103,7 @@ class APISale(YoyoAPITestCase):
         c.save()
 
         # Create  through API
-        my_time = datetime.now()
+        my_time = timezone.now()
 
         url = self.get_url(self.SALE_LIST_ENDP, args=[c.pk])
         response = self.client.post(url, {'date':str(my_time)})
