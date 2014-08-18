@@ -19,7 +19,7 @@ class APISale(YoyoAPITestCase):
     def test_sales_list_empty(self):
         """
         Test that for a given customer initially the sales list is empty.
-        This tests the GET endpoint /loyal/customer/${id}/vouchers
+        This tests the GET endpoint /loyal/customer/${id}/sales
         """
 
         # Create customer
@@ -39,7 +39,7 @@ class APISale(YoyoAPITestCase):
         """
         Test that for a given customer we can see it's purchases.
         We create 2 sales directly in the DB, one without products the other with 1 product
-        This tests the GET from endpoint /loyal/customer/${id}/vouchers
+        This tests the GET from endpoint /loyal/customer/${id}/sales
         """
 
         # Create customer
@@ -77,7 +77,7 @@ class APISale(YoyoAPITestCase):
     def test_create_sale_with_no_date(self):
         """
         Test that creates a sale without a date
-        This tests the POST from endpoint /loyal/customer/${id}/vouchers.
+        This tests the POST from endpoint /loyal/customer/${id}/sales
         """
 
         # Create customer in DB
@@ -95,7 +95,7 @@ class APISale(YoyoAPITestCase):
     def test_create_sale(self):
         """
         Test that creates a single sale with no product
-        This tests the POST from endpoint /loyal/customer/${id}/vouchers.
+        This tests the POST from endpoint /loyal/customer/${id}/sales
         """
 
         # Create customer in DB
@@ -116,7 +116,7 @@ class APISale(YoyoAPITestCase):
     def test_create_sale_non_existan_owner(self):
         """
         Test that tries to create a sale with an unkown owner
-        This tests the POST from endpoint /loyal/customer/${id}/vouchers.
+        This tests the POST from endpoint /loyal/customer/${id}/sales
         """
 
         # Create customer in DB
