@@ -4,9 +4,11 @@ from django.http import Http404
 from rest_framework.reverse import reverse
 
 class VoucherSerializer(serializers.ModelSerializer):
+    link = serializers.HyperlinkedIdentityField(view_name='loyal:voucher:voucher-detail')
+
     class Meta:
         model = Voucher
-        fields = ('date', 'redeemed_with')
+        fields = ('date', 'redeemed_with', 'link')
 
     def restore_object(self, attrs, instance=None):
         pk = self.context['view'].kwargs['pk']

@@ -12,10 +12,12 @@ class CustomerSerializerList(serializers.ModelSerializer):
 
 
 class CustomerSerializerDetail(serializers.ModelSerializer):
-    num_stamps = serializers.IntegerField(source='stamp_set.count', read_only=True)
+    available_stamps = serializers.SerializerMethodField('get_available_stamps')
+    total_stamps = serializers.IntegerField(source='stamp_set.count', read_only=True)
     stamps = serializers.HyperlinkedIdentityField(view_name='loyal:customer:stamp-list')
 
-    num_vouchers = serializers.IntegerField(source='voucher_set.count', read_only=True)
+    available_vouchers = serializers.SerializerMethodField('get_available_vouchers')
+    total_vouchers = serializers.IntegerField(source='voucher_set.count', read_only=True)
     vouchers = serializers.HyperlinkedIdentityField(view_name='loyal:customer:voucher-list')
 
     num_purchases = serializers.IntegerField(source='sale_set.count', read_only=True)
@@ -23,5 +25,13 @@ class CustomerSerializerDetail(serializers.ModelSerializer):
 
     class Meta:
         model = Customer
-        fields = ('first_name', 'last_name', 'email', 'num_stamps', 'stamps',
-                  'num_vouchers', 'vouchers', 'num_purchases', 'purchases')
+        fields = ('first_name', 'last_name', 'email',
+                  'available_stamps',  'total_stamps', 'stamps',
+                  'available_vouchers', 'total_vouchers',  'vouchers',
+                  'num_purchases', 'purchases')
+
+    def get_available_stamps(self, obj):
+        return obj.stamp_set.filter(grouped_in__isnull=True).count()
+
+    def get_available_vouchers(self, obj):
+        return obj.voucher_set.filter(redeemed_with__isnull=True).count()

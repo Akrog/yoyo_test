@@ -5,9 +5,11 @@ from rest_framework.reverse import reverse
 
 
 class StampSerializer(serializers.ModelSerializer):
+    link = serializers.HyperlinkedIdentityField(view_name='loyal:stamp:stamp-detail')
+
     class Meta:
         model = Stamp
-        fields = ('obtained_with', 'grouped_in')
+        fields = ('obtained_with', 'grouped_in', 'link')
 
     def restore_object(self, attrs, instance=None):
         pk = self.context['view'].kwargs['pk']
