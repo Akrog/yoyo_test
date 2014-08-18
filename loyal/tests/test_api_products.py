@@ -15,7 +15,18 @@ class APIProduct(APITestCase):
         /loyal/products
     """
 
-    ENDPOINT = reverse('loyal:product-list')
+
+    PROD_LIST_ENDP  = 0
+    PROD_DET_ENDP   = 1
+
+    namespace_path = ['loyal', 'product']
+
+    endpoints = {
+        PROD_LIST_ENDP  :'product-list',
+        PROD_DET_ENDP   :'product-detail',
+    }
+
+    URL_TEST_PREFIX = "http://testserver"
 
     EMPTY_LIST = {
         'count': 0,
@@ -32,6 +43,13 @@ class APIProduct(APITestCase):
     }
 
 
+    def get_url(self, entrypoint, *args, **kwargs):
+        namespace = ":".join(self.namespace_path)
+        return reverse(namespace + ":" + self.endpoints[entrypoint], *args, **kwargs)
+
+    def get_test_url(self, entrypoint, *args, **kwargs):
+        return self.URL_TEST_PREFIX + self.get_url(entrypoint, *args, **kwargs)
+
     def test_product_list_empty(self):
         """
         Test that initially we don't have any products
@@ -39,7 +57,8 @@ class APIProduct(APITestCase):
         """
 
         # Get list
-        response = self.client.get(self.ENDPOINT)
+        url = self.get_url(self.PROD_LIST_ENDP)
+        response = self.client.get(url)
 
         # Confirm it's OK
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -70,8 +89,13 @@ class APIProduct(APITestCase):
         expected_response['results'] = ProductSerializer(products, many=True).data
         expected_response['count'] = 2
 
+        for product in expected_response['results']:
+            product['link'] = self.URL_TEST_PREFIX +  product['link']
+
+
         # Get list
-        response = self.client.get(self.ENDPOINT)
+        url = self.get_url(self.PROD_LIST_ENDP)
+        response = self.client.get(url)
 
         # Confirm it's OK
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -91,11 +115,14 @@ class APIProduct(APITestCase):
         new_product = dict(self.new_product)
         new_product['date'] = str(my_time)
 
-        response = self.client.post(self.ENDPOINT, new_product)
+        url = self.get_url(self.PROD_LIST_ENDP)
+        response = self.client.post(url, new_product)
 
         # Confirm it's OK
         new_product['date'] = my_time
         new_product['kind_name'] = Product.PRODUCT_CHOICES[new_product['kind']][1]
+        new_product['id'] = 1
+        new_product['link'] = self.get_test_url(self.PROD_DET_ENDP, args=[1])
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data, new_product)
@@ -111,7 +138,8 @@ class APIProduct(APITestCase):
         p.save()
 
         # Create  through API
-        response = self.client.post(self.ENDPOINT, self.new_product)
+        url = self.get_url(self.PROD_LIST_ENDP)
+        response = self.client.post(url, self.new_product)
 
         # Confirm it's not OK
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -127,7 +155,8 @@ class APIProduct(APITestCase):
         new_product['kind'] = len(Product.PRODUCT_CHOICES)
 
         # Create  through API
-        response = self.client.post(self.ENDPOINT, new_product)
+        url = self.get_url(self.PROD_LIST_ENDP)
+        response = self.client.post(url, new_product)
 
         # Confirm it's not OK
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -143,7 +172,8 @@ class APIProduct(APITestCase):
         new_product['serial_num'] = ""
 
         # Create  through API
-        response = self.client.post(self.ENDPOINT, new_product)
+        url = self.get_url(self.PROD_LIST_ENDP)
+        response = self.client.post(url, new_product)
 
         # Confirm it's not OK
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -159,7 +189,8 @@ class APIProduct(APITestCase):
         new_product['sale'] = 1
 
         # Create  through API
-        response = self.client.post(self.ENDPOINT, new_product)
+        url = self.get_url(self.PROD_LIST_ENDP)
+        response = self.client.post(url, new_product)
 
         # Confirm it's not OK
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -175,7 +206,8 @@ class APIProduct(APITestCase):
         new_product['date'] = "17 march 2015"
 
         # Create  through API
-        response = self.client.post(self.ENDPOINT, new_product)
+        url = self.get_url(self.PROD_LIST_ENDP)
+        response = self.client.post(url, new_product)
 
         # Confirm it's not OK
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
