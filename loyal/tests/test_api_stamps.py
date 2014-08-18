@@ -179,5 +179,4 @@ class APIStamp(YoyoAPITestCase):
         response = self.client.post(url, stamp_data)
 
         # Confirm it's not OK
-        print "response", response.status_code
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
