@@ -29,7 +29,6 @@ class StampListSerializer(serializers.ModelSerializer):
 
 
 class StampDetailSerializer(serializers.ModelSerializer):
-    #owner_details = serializers.HyperlinkedIdentityField(view_name='loyal:customer:stamp-detail')
     owner_details = serializers.SerializerMethodField('get_owner_url')
 
     class Meta:
@@ -37,5 +36,4 @@ class StampDetailSerializer(serializers.ModelSerializer):
         fields = ('id', 'owned_by', 'owner_details', 'obtained_with', 'grouped_in')
 
     def get_owner_url(self, obj):
-        #customer = obj['given_with__sold_in__customer__pk']
         return reverse('loyal:customer:customer-detail', args=[obj.owned_by.pk], request=self.context['request'])
