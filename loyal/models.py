@@ -60,6 +60,23 @@ class Product(models.Model):
         return " ".join([self.PRODUCT_CHOICES[self.kind][1], "[", str(self.pk), "]"])
 
 
+    def save(self, *args, **kwargs):
+        """
+        Whether we create a new product or modify an existing one, if it's sold, we have to make sure that there's a stamp for it.
+        """
+
+        # Call the "real" save() method.
+        super(Product, self).save(*args, **kwargs)
+
+        # If sold and is a Widget
+        if self.sale and self.kind == self.WIDGET:
+            # But has not stamp
+            try:
+                self.stamp
+            except:
+                s = Stamp(owned_by=self.sale.customer, obtained_with=self)
+                s.save()
+
 
 class Voucher(models.Model):
     """
