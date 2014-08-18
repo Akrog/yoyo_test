@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from loyal.models import Sale, Customer
+from django.http import Http404
 
 class SaleSerializer(serializers.ModelSerializer):
     products = serializers.RelatedField(source="product_set", many=True)
@@ -8,8 +9,12 @@ class SaleSerializer(serializers.ModelSerializer):
         model = Sale
         fields = ('customer', 'date', 'products')
 
-
     def restore_object(self, attrs, instance=None):
         pk = self.context['view'].kwargs['pk']
-        attrs['customer'] = Customer.objects.get(pk=pk)
+
+        try:
+            attrs['customer'] = Customer.objects.get(pk=pk)
+        except Customer.DoesNotExist:
+            raise Http404
+
         return Stamp(**attrs)
