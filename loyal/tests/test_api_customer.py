@@ -6,6 +6,9 @@ from django.utils import timezone
 
 from loyal.models import Customer, Product, Sale, Stamp, Voucher
 
+from loyal.serializers import CustomerSerializerList
+
+import names as gen_names
 
 class APICustomer(APITestCase):
     """
@@ -45,13 +48,15 @@ class APICustomer(APITestCase):
         'sale': None
     }
 
+    URL_TEST_PREFIX = "http://testserver"
+
 
     def get_url(self, entrypoint, *args, **kwargs):
         namespace = ":".join(self.namespace_path)
         return reverse(namespace + ":" + self.endpoints[entrypoint], *args, **kwargs)
 
     def get_test_url(self, entrypoint, *args, **kwargs):
-        return "http://testserver" + self.get_url(entrypoint, *args, **kwargs)
+        return self.URL_TEST_PREFIX + self.get_url(entrypoint, *args, **kwargs)
 
 
     def test_get_list_empty(self):
@@ -99,9 +104,40 @@ class APICustomer(APITestCase):
         self.assertEqual(expected_customer, response.data[0])
 
 
+    def test_get_list_20_customers(self):
+        """
+        Verify that the customers list endpoint returns customers from the DB.
+        This is a more advanced test with 20 different customers.
+        This tests the GET endpoint /loyal/customer
+        """
+
+        # Create customers
+        customers = []
+        for _ in xrange(20):
+            name = gen_names.get_first_name()
+            surname = gen_names.get_last_name()
+            customer = Customer(first_name=name, last_name=surname, email=name+"@"+surname+".com")
+            customer.save()
+            customers.append(customer)
+
+        # Transform customers
+        expected_response = CustomerSerializerList(customers, many=True).data
+        for customer in expected_response:
+            customer['details'] = self.URL_TEST_PREFIX + customer['details']
+
+        # Get list from endpoint
+        url = self.get_url(self.CUST_LIST_ENDP)
+        response = self.client.get(url)
+
+        # Confirm it's OK
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(20, len(response.data))
+        self.assertEqual(expected_response, response.data)
+
+
     def test_list_create_one_customer(self):
         """
-        Verify that the customers list endpoint for customer creation works.
+        Verify that the customers list endpoint works for customer creation.
         Simple test that will POST only 1 new customer
         This tests the POST endpoint /loyal/customer
         """
@@ -119,6 +155,141 @@ class APICustomer(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data, expected_customer)
+
+
+    def test_list_create_customer_empty_name(self):
+        """
+        Verify that the customers detail endpoint doesn't accept empty name.
+        This is a basic test with only 1 customer.
+        This tests the GET endpoint /loyal/customer/${id}
+        """
+
+        # POST creation
+        url = self.get_url(self.CUST_LIST_ENDP)
+        my_customer = dict(self.new_customer)
+        my_customer['first_name'] = ""
+        response = self.client.post(url, my_customer)
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+    def test_list_create_customer_without_name(self):
+        """
+        Verify that the customers detail endpoint doesn't accept a request with the name missing.
+        This is a basic test with only 1 customer.
+        This tests the GET endpoint /loyal/customer/${id}
+        """
+
+        # POST creation
+        url = self.get_url(self.CUST_LIST_ENDP)
+        my_customer = dict(self.new_customer)
+        del my_customer['first_name']
+        response = self.client.post(url, my_customer)
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+    def test_list_create_customer_empty_surname(self):
+        """
+        Verify that the customers detail endpoint doesn't accept empty last name.
+        This is a basic test with only 1 customer.
+        This tests the GET endpoint /loyal/customer/${id}
+        """
+
+        # POST creation
+        url = self.get_url(self.CUST_LIST_ENDP)
+        my_customer = dict(self.new_customer)
+        my_customer['last_name'] = ""
+        response = self.client.post(url, my_customer)
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+    def test_list_create_customer_without_surname(self):
+        """
+        Verify that the customers detail endpoint doesn't accept a request with the last name missing.
+        This is a basic test with only 1 customer.
+        This tests the GET endpoint /loyal/customer/${id}
+        """
+
+        # POST creation
+        url = self.get_url(self.CUST_LIST_ENDP)
+        my_customer = dict(self.new_customer)
+        del my_customer['last_name']
+        response = self.client.post(url, my_customer)
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+    def test_list_create_customer_empty_email(self):
+        """
+        Verify that the customers detail endpoint doesn't accept empty email.
+        This is a basic test with only 1 customer.
+        This tests the GET endpoint /loyal/customer/${id}
+        """
+
+        # POST creation
+        url = self.get_url(self.CUST_LIST_ENDP)
+        my_customer = dict(self.new_customer)
+        my_customer['email'] = ""
+        response = self.client.post(url, my_customer)
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+    def test_list_create_customer_without_email(self):
+        """
+        Verify that the customers detail endpoint doesn't accept a request with the email missing.
+        This is a basic test with only 1 customer.
+        This tests the GET endpoint /loyal/customer/${id}
+        """
+
+        # POST creation
+        url = self.get_url(self.CUST_LIST_ENDP)
+        my_customer = dict(self.new_customer)
+        del my_customer['email']
+        response = self.client.post(url, my_customer)
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+    def test_list_create_20_customer(self):
+        """
+        Verify that the customers list endpoint works for customer creation.
+        More advanced test that will POST only 20 new customer
+        This tests the POST endpoint /loyal/customer
+        """
+
+        created_customers = []
+        # POST creation
+        url = self.get_url(self.CUST_LIST_ENDP)
+        for i in xrange(20):
+            name = gen_names.get_first_name()
+            surname = gen_names.get_last_name()
+            customer = {'first_name':name, 'last_name':surname, 'email':name+"@"+surname+".com"}
+
+            response = self.client.post(url, customer)
+
+            # Create expected customer, now includes the id
+            customer.update({
+                'id': i+1,
+                'details': self.get_test_url(self.CUST_DET_ENDP, args=[i+1])
+            })
+
+            created_customers.append(customer)
+
+            self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+            self.assertEqual(response.data, customer)
+
+        self.assertEqual(20, Customer.objects.count())
+
+        # Transform customers
+        customers_in_db = CustomerSerializerList(Customer.objects.all(), many=True).data
+
+        for customer in customers_in_db:
+            customer['details'] = self.URL_TEST_PREFIX + customer['details']
+
+        self.assertEqual(created_customers, customers_in_db)
 
 
     def test_get_detail_unkown_customer(self):
