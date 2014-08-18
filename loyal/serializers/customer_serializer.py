@@ -4,11 +4,11 @@ from loyal.models import Customer
 from rest_framework.reverse import reverse
 
 class CustomerSerializerList(serializers.ModelSerializer):
-    link = serializers.HyperlinkedIdentityField(view_name='loyal:customer:customer-detail')
+    details = serializers.HyperlinkedIdentityField(view_name='loyal:customer:customer-detail')
 
     class Meta:
         model = Customer
-        fields = ('id', 'link')
+        fields = ('id', 'first_name', 'last_name', 'email', 'details')
 
 
 class CustomerSerializerDetail(serializers.ModelSerializer):

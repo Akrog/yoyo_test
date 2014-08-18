@@ -19,6 +19,7 @@ class APICustomer(APITestCase):
     CUST_DET_ENDP   = 1
     STAMP_LIST_ENDP = 2
     VOUCH_LIST_ENDP = 3
+    SALE_LIST_ENDP  = 4
 
     namespace_path = ['loyal', 'customer']
 
@@ -28,6 +29,7 @@ class APICustomer(APITestCase):
         CUST_DET_ENDP   :'customer-detail',
         STAMP_LIST_ENDP :'stamp-list',
         VOUCH_LIST_ENDP :'voucher-list',
+        SALE_LIST_ENDP  :'sale-list',
     }
 
 
@@ -47,6 +49,9 @@ class APICustomer(APITestCase):
     def get_url(self, entrypoint, *args, **kwargs):
         namespace = ":".join(self.namespace_path)
         return reverse(namespace + ":" + self.endpoints[entrypoint], *args, **kwargs)
+
+    def get_test_url(self, entrypoint, *args, **kwargs):
+        return "http://testserver" + self.get_url(entrypoint, *args, **kwargs)
 
 
     def test_get_list_empty(self):
@@ -83,7 +88,10 @@ class APICustomer(APITestCase):
 
         # Create expected customer, now includes the id
         expected_customer = dict(self.new_customer)
-        expected_customer['id'] = c.pk
+        expected_customer.update({
+            'id': c.pk,
+            'details': self.get_test_url(self.CUST_DET_ENDP, args=[c.pk])
+        })
 
         # Confirm it's OK
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -104,7 +112,10 @@ class APICustomer(APITestCase):
 
         # Create expected customer, now includes the id
         expected_customer = dict(self.new_customer)
-        expected_customer['id'] = 1
+        expected_customer.update({
+            'id': 1,
+            'details': self.get_test_url(self.CUST_DET_ENDP, args=[1])
+        })
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data, expected_customer)
@@ -145,9 +156,14 @@ class APICustomer(APITestCase):
         response = self.client.get(url)
 
         expected_customer = dict(self.new_customer)
-        expected_customer['num_stamps'] = 0
-        expected_customer['num_vouchers'] = 0
-        expected_customer['num_purchases'] = 0
+        expected_customer.update({
+            'num_stamps': 0,
+            'stamps': self.get_test_url(self.STAMP_LIST_ENDP, args=[c.pk]),
+            'num_vouchers': 0,
+            'vouchers': self.get_test_url(self.VOUCH_LIST_ENDP, args=[c.pk]),
+            'num_purchases': 0,
+            'purchases': self.get_test_url(self.SALE_LIST_ENDP, args=[c.pk]),
+        })
 
         # Confirm it's OK
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -188,7 +204,15 @@ class APICustomer(APITestCase):
         response = self.client.get(url)
 
         expected_customer = dict(self.new_customer)
-        expected_customer.update ({'num_stamps':1, 'num_vouchers':2, 'num_purchases':3})
+        expected_customer = dict(self.new_customer)
+        expected_customer.update({
+            'num_stamps': 1,
+            'stamps': self.get_test_url(self.STAMP_LIST_ENDP, args=[c.pk]),
+            'num_vouchers': 2,
+            'vouchers': self.get_test_url(self.VOUCH_LIST_ENDP, args=[c.pk]),
+            'num_purchases': 3,
+            'purchases': self.get_test_url(self.SALE_LIST_ENDP, args=[c.pk]),
+        })
 
         # Confirm it's OK
         self.assertEqual(response.status_code, status.HTTP_200_OK)
