@@ -9,7 +9,7 @@ from loyal.views import ProductListView, ProductDetailView
 def api_loyal(request, format=None):
     return Response({
         'customer': reverse('loyal:customer:customer-list', request=request, format=format),
-        'products': reverse('loyal:product-list', request=request, format=format),
+        'products': reverse('loyal:product:product-list', request=request, format=format),
     })
 
 
