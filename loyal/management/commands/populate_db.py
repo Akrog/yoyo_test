@@ -73,7 +73,7 @@ class Command(BaseCommand):
         products_to_sell = int(0.8 * self.num_products)
 
         # We'll generate a random number of sales
-        num_sales = random.randint(self.num_customers, products_to_sell/2)
+        num_sales = random.randint(self.num_customers, products_to_sell/5)
         products_sold = 0
 
         print "Creating {0} sales ".format(num_sales),
@@ -89,6 +89,10 @@ class Command(BaseCommand):
             # Attach products to customer
             randomize_products = products_to_sell - (num_sales - i)
             num_products = random.randint(1, randomize_products)
+
+            if customer_num == 1:
+                import pdb
+                pdb.set_trace()
 
             for i in xrange(products_sold+1, products_sold+num_products+1):
                 product = Product.objects.get(pk=i)
