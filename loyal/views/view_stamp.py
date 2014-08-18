@@ -1,6 +1,6 @@
 from rest_framework import generics
 from loyal.models import Stamp, Customer
-from loyal.serializers import StampSerializer
+from loyal.serializers import StampSerializer, StampListSerializer, StampDetailSerializer
 from django.http import Http404
 
 
@@ -22,3 +22,22 @@ class StampList(generics.ListCreateAPIView):
             raise Http404
 
         return customer.stamp_set.all()
+
+
+
+class StampListAllView(generics.ListAPIView):
+    """
+    This endpoint show all stamps
+    """
+
+    queryset = Stamp.objects.all()
+    serializer_class = StampListSerializer
+
+
+class StampDetailView(generics.RetrieveUpdateAPIView):
+    """
+    This endpoint gives stamp details and allows us to modify an existing stamp
+    """
+
+    queryset = Stamp.objects.all()
+    serializer_class = StampDetailSerializer
