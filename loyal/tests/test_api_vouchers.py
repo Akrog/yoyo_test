@@ -32,6 +32,44 @@ class APIVoucher(YoyoAPITestCase):
         self.assertEqual(response.data, [])
 
 
+    def test_voucher_list_populated(self):
+        """
+        Test that for a given customer we can see it's vouchers.
+        We create 2 vouchers directly in the DB, one available and one redeemed.
+        This tests the GET from endpoint /loyal/customer/${id}/vouchers
+        """
+
+        # Create customer
+        c = Customer(**self.new_customer)
+        c.save()
+
+        # Create product
+        p = Product(**self.new_product)
+        p.save()
+
+        # Create voucher
+        v = Voucher(owned_by=c, redeemed_with=p)
+        v.save()
+
+        # Create free voucher
+        v = Voucher(owned_by=c)
+        v.save()
+
+        # Get list
+        url = self.get_url(self.VOUCH_LIST_ENDP, args=[c.pk])
+        response = self.client.get(url)
+
+        # Confirm it's OK
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(2, len(response.data))
+
+        voucher_data = {"redeemed_with": p.pk, "date": response.data[0].get("date", None)}
+        self.assertEqual(response.data[0], voucher_data)
+
+        voucher_data = {"redeemed_with": None, "date": response.data[1].get("date", None)}
+        self.assertEqual(response.data[1], voucher_data)
+
+
     def test_create_free_voucher(self):
         """
         Test that creates a free voucher for a given customer.
@@ -104,3 +142,67 @@ class APIVoucher(YoyoAPITestCase):
 
         # Confirm that there are 10 stamps linked to the voucher
         self.assertEqual(10, vouchers[0].stamp_set.count())
+
+
+    def test_create_voucher_non_existan_owner(self):
+        """
+        Test that tries to create a normal voucher with an unkown owner
+        This tests the POST from endpoint /loyal/customer/${id}/vouchers.
+        """
+
+        # Create customer in DB
+        c = Customer(**self.new_customer)
+        c.save()
+
+        # Create stamp through API
+        url = self.get_url(self.VOUCH_LIST_ENDP, args=[c.pk+1])
+        response = self.client.post(url, {})
+
+        # Confirm it's not OK
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+
+    def test_create_voucher_non_existan_redeem_product(self):
+        """
+        Test that tries to create a normal voucher to redeem a non existant product
+        This tests the POST from endpoint /loyal/customer/${id}/vouchers.
+        """
+
+        # Create customer in DB
+        c = Customer(**self.new_customer)
+        c.save()
+
+        # Create stamp through API
+        voucher_data = {"redeemed_with": 10}
+        url = self.get_url(self.VOUCH_LIST_ENDP, args=[c.pk+1])
+        response = self.client.post(url, voucher_data)
+
+        # Confirm it's not OK
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+    def test_create_voucher_product_occupied(self):
+        """
+        Test that tries to create a redeemed voucher for a product that has already been redeemed.
+        This tests the POST from endpoint /loyal/customer/${id}/vouchers
+        """
+
+        # Create customer in DB
+        c = Customer(**self.new_customer)
+        c.save()
+
+        # Create product in DB
+        p = Product(**self.new_product)
+        p.save()
+
+        # Create voucher in DB
+        v = Voucher(owned_by=c, redeemed_with=p)
+        v.save()
+
+        # Create voucher through API
+        voucher_data = {"redeemed_with": p.pk}
+        url = self.get_url(self.VOUCH_LIST_ENDP, args=[c.pk])
+        response = self.client.post(url, voucher_data)
+
+        # Confirm it's not OK
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

@@ -132,7 +132,7 @@ class APIStamp(YoyoAPITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 
-    def test_create_stamp_product_occupied(self):
+    def test_create_stamp_non_existan_owner(self):
         """
         Test that tries to create a normal stamp with an unkown owner
         This tests the POST from endpoint /loyal/customer/${id}/stamps.
@@ -153,3 +153,31 @@ class APIStamp(YoyoAPITestCase):
 
         # Confirm it's not OK
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+
+    def test_create_stamp_product_occupied(self):
+        """
+        Test that tries to create a normal stamp with an unkown owner
+        This tests the POST from endpoint /loyal/customer/${id}/stamps.
+        """
+
+        # Create customer in DB
+        c = Customer(**self.new_customer)
+        c.save()
+
+        # Create product in DB
+        p = Product(**self.new_product)
+        p.save()
+
+        # Stamp product in DB
+        st = Stamp(owned_by=c, obtained_with=p, grouped_in=None)
+        st.save()
+
+        # Create stamp through API
+        stamp_data = {"obtained_with": p.pk, "grouped_in": None}
+        url = self.get_url(self.STAMP_LIST_ENDP, args=[c.pk])
+        response = self.client.post(url, stamp_data)
+
+        # Confirm it's not OK
+        print "response", response.status_code
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
