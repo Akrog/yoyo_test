@@ -63,10 +63,14 @@ class APIVoucher(YoyoAPITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(2, len(response.data))
 
-        voucher_data = {"redeemed_with": p.pk, "date": response.data[0].get("date", None)}
+        voucher_data = {"redeemed_with": p.pk,
+                        "date": response.data[0].get("date", None),
+                        'link': self.get_non_customer_url(self.VOUCHER_ENDP, args=[1])}
         self.assertEqual(response.data[0], voucher_data)
 
-        voucher_data = {"redeemed_with": None, "date": response.data[1].get("date", None)}
+        voucher_data = {"redeemed_with": None,
+                        "date": response.data[1].get("date", None),
+                        'link': self.get_non_customer_url(self.VOUCHER_ENDP, args=[2])}
         self.assertEqual(response.data[1], voucher_data)
 
 
@@ -87,7 +91,11 @@ class APIVoucher(YoyoAPITestCase):
         # Confirm it's OK
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-        free_vouch = {"redeemed_with": None, "date": response.data.get("date", None)}
+        free_vouch = {
+            "redeemed_with": None,
+            "date": response.data.get("date", None),
+            'link': self.get_non_customer_url(self.VOUCHER_ENDP, args=[1]),
+        }
         self.assertEqual(response.data, free_vouch)
 
 
@@ -112,7 +120,11 @@ class APIVoucher(YoyoAPITestCase):
 
         # Confirm it's OK
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        voucher_data ["date"] = response.data.get("date", None)
+        voucher_data.update({
+            'date':response.data.get("date", None),
+            'link': self.get_non_customer_url(self.VOUCHER_ENDP, args=[1]),
+        })
+
         self.assertEqual(response.data, voucher_data)
 
 

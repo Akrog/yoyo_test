@@ -16,6 +16,9 @@ class YoyoAPITestCase(APITestCase):
     STAMP_LIST_ENDP = 2
     VOUCH_LIST_ENDP = 3
     SALE_LIST_ENDP  = 4
+    VOUCHER_ENDP    = 5
+    PRODUCT_ENDP    = 6
+    STAMP_ENDP      = 7
 
     namespace_path = ['loyal', 'customer']
 
@@ -26,6 +29,9 @@ class YoyoAPITestCase(APITestCase):
         STAMP_LIST_ENDP :'stamp-list',
         VOUCH_LIST_ENDP :'voucher-list',
         SALE_LIST_ENDP  :'sale-list',
+        VOUCHER_ENDP    :'voucher:voucher-detail',
+        PRODUCT_ENDP    :'product:product-detail',
+        STAMP_ENDP      :'stamp:stamp-detail',
     }
 
 
@@ -50,3 +56,6 @@ class YoyoAPITestCase(APITestCase):
 
     def get_test_url(self, entrypoint, *args, **kwargs):
         return self.URL_TEST_PREFIX + self.get_url(entrypoint, *args, **kwargs)
+
+    def get_non_customer_url(self, entrypoint, *args, **kwargs):
+        return self.URL_TEST_PREFIX + reverse(self.namespace_path[0]+':'+self.endpoints[entrypoint], *args, **kwargs)

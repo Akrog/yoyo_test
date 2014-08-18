@@ -63,10 +63,17 @@ class APIStamp(YoyoAPITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(2, len(response.data))
 
-        stamp_data = {'obtained_with': p.pk, 'grouped_in': None}
+        stamp_data = {
+            'obtained_with': p.pk,
+            'grouped_in': None,
+            'link': self.get_non_customer_url(self.STAMP_ENDP, args=[1]),
+        }
         self.assertEqual(response.data[0], stamp_data)
 
-        stamp_data['obtained_with'] = None
+        stamp_data.update({
+            'obtained_with': None,
+            'link': self.get_non_customer_url(self.STAMP_ENDP, args=[2]),
+        })
         self.assertEqual(response.data[1], stamp_data)
 
 
@@ -85,7 +92,11 @@ class APIStamp(YoyoAPITestCase):
         response = self.client.post(url)
 
         # Confirm it's OK
-        free_stamp = {"obtained_with": None, "grouped_in": None}
+        free_stamp = {
+            "obtained_with": None,
+            "grouped_in": None,
+            'link': self.get_non_customer_url(self.STAMP_ENDP, args=[1]),
+        }
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data, free_stamp)
 
@@ -105,9 +116,14 @@ class APIStamp(YoyoAPITestCase):
         p.save()
 
         # Create stamp
-        stamp_data = {"obtained_with": p.pk, "grouped_in": None}
+        stamp_data = {
+            "obtained_with": p.pk,
+            "grouped_in": None,
+        }
         url = self.get_url(self.STAMP_LIST_ENDP, args=[c.pk])
         response = self.client.post(url, stamp_data)
+
+        stamp_data['link'] = self.get_non_customer_url(self.STAMP_ENDP, args=[1])
 
         # Confirm it's OK
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)

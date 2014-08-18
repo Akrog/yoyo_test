@@ -90,7 +90,7 @@ class APIProduct(APITestCase):
         expected_response['count'] = 2
 
         for product in expected_response['results']:
-            product['link'] = self.URL_TEST_PREFIX +  product['link']
+            product['to_modify'] = self.URL_TEST_PREFIX +  product['to_modify']
 
 
         # Get list
@@ -122,7 +122,7 @@ class APIProduct(APITestCase):
         new_product['date'] = my_time
         new_product['kind_name'] = Product.PRODUCT_CHOICES[new_product['kind']][1]
         new_product['id'] = 1
-        new_product['link'] = self.get_test_url(self.PROD_DET_ENDP, args=[1])
+        new_product['to_modify'] = self.get_test_url(self.PROD_DET_ENDP, args=[1])
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data, new_product)

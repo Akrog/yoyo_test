@@ -286,9 +286,11 @@ class APICustomer(YoyoAPITestCase):
 
         expected_customer = dict(self.new_customer)
         expected_customer.update({
-            'num_stamps': 0,
+            'available_stamps': 0,
+            'total_stamps': 0,
             'stamps': self.get_test_url(self.STAMP_LIST_ENDP, args=[c.pk]),
-            'num_vouchers': 0,
+            'available_vouchers': 0,
+            'total_vouchers': 0,
             'vouchers': self.get_test_url(self.VOUCH_LIST_ENDP, args=[c.pk]),
             'num_purchases': 0,
             'purchases': self.get_test_url(self.SALE_LIST_ENDP, args=[c.pk]),
@@ -335,9 +337,11 @@ class APICustomer(YoyoAPITestCase):
         expected_customer = dict(self.new_customer)
         expected_customer = dict(self.new_customer)
         expected_customer.update({
-            'num_stamps': 1,
+            'available_stamps': 1,
+            'total_stamps': 1,
             'stamps': self.get_test_url(self.STAMP_LIST_ENDP, args=[c.pk]),
-            'num_vouchers': 2,
+            'available_vouchers': 2,
+            'total_vouchers': 2,
             'vouchers': self.get_test_url(self.VOUCH_LIST_ENDP, args=[c.pk]),
             'num_purchases': 3,
             'purchases': self.get_test_url(self.SALE_LIST_ENDP, args=[c.pk]),

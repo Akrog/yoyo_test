@@ -6,7 +6,7 @@ from django.utils import timezone
 from datetime import datetime
 
 import names as gen_names
-
+from django.core.urlresolvers import reverse
 
 
 class APISale(YoyoAPITestCase):
@@ -67,10 +67,16 @@ class APISale(YoyoAPITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(2, len(response.data))
 
-        sale_data = {"date": response.data[0].get("date", None), 'products':[]}
+        sale_data = {"date": response.data[0].get("date", None),
+                     'products':[],
+                     'products_links':[]
+        }
         self.assertEqual(response.data[0], sale_data)
 
-        sale_data = {"date": response.data[1].get("date", None), 'products':[str(p)]}
+        sale_data = {"date": response.data[1].get("date", None),
+                     'products':[str(p)],
+                     'products_links': [self.get_non_customer_url(self.PRODUCT_ENDP, args=[1])],
+        }
         self.assertEqual(response.data[1], sale_data)
 
 
@@ -110,7 +116,7 @@ class APISale(YoyoAPITestCase):
 
         # Confirm it's OK
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(response.data, {'date':my_time, 'products':[]})
+        self.assertEqual(response.data, {'date':my_time, 'products':[], 'products_links':[]})
 
 
     def test_create_sale_non_existan_owner(self):
